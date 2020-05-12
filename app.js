@@ -2,6 +2,8 @@ const inquirer = require("inquirer");
 
 const mysql = require("mysql");
 
+const sqlUtils = require("./CompanyDbUtils");
+
 const connection = mysql.createConnection({
     host: "localhost",
     port: "3306",
