@@ -156,6 +156,115 @@ function addEmployee(connection, cb) {
     });
   });
 }
+function viewEmployees(connection, cb) {
+  connection.query(`select * from employee`, function(err, data) {
+    if (err) {
+      console.log(err);
+    }
+    let resvar = data.map(value => {
+      return { first_name: value.first_name, last_name: value.last_name };
+    });
+  
+    printDataResult(resvar);
+    cb();
+  });
+}
+
+function viewDeparments(connection,cb) {
+  connection.query(`select * from department`, function(err, data) {
+    if (err) {
+      console.log(err);
+    }
+    let resvar = data.map(value => {
+      return { name: value.name };
+    });
+
+    printDataResult(resvar);
+    cb();
+  });
+}
+
+function viewRoles( connection ,cb) {
+
+  connection.query(`select * from role`, function(err, data) {
+    if (err) {
+      console.log(err);
+    }
+    let resvar = data.map(value => {
+      return { title: value.title, salary: value.salary };
+    });
+    
+    printDataResult(resvar);
+    cb();
+  });
+}
+
+function updateEmployeeRoles(connection,cb) {
+connection.query("select id, first_name, last_name from employee", function(err,employeeResults){
+  if(err) console.log(err);
+  const employees = employeeResults.map(employee => employee.first_name + " " + employee.last_name);
+
+
+  inquirer.prompt([{
+    type:"list",
+    message:"which employee would you like to update the role of?",
+    choices: employees,
+    name: "employee"
+  }]).then(function(res){
+    checkIfChosenMatches  = curr => {return `${curr.first_name} ${curr.last_name}` ===res.employee}
+    employeeId = employeeResults[employeeResults.findIndex(checkIfChosenMatches)].id;
+    connection.query("select id, title from role", function(err, roleResults){
+      if(err) console.log(err);
+      const roles = roleResults.map(role => role.title);
+      inquirer.prompt([
+        {
+          type:"list",
+          choices: roles,
+          name: "newrole",
+          message: "Which role would you like the employee to be changed to?"
+        }
+      ]).then(function(role){
+        checkRole  = curr => {return `${curr.title}` ===role.newrole}
+        
+        roleid = roleResults[roleResults.findIndex(checkRole)].id;
+        
+        connection.query(
+          `UPDATE employee
+                SET roleid = ? 
+                WHERE id = ?;`,
+          [roleid, employeeId],
+          function(err) {
+            if (err) {
+              console.log(err);
+            }
+            cb();
+          }
+        );
+      })
+    });
+
+  })
+
+})
+
+}
+
+function printDataResult(result) {
+result.forEach(element => {
+  console.log(element);
+});
+}
+
+module.exports = {
+addEmployee: addEmployee,
+addDepartment: addDepartment,
+addRole: addRole,
+viewDeparments: viewDeparments,
+viewEmployees: viewEmployees,
+viewRoles: viewRoles,
+updateEmployeeRoles: updateEmployeeRoles
+};
+
 
 
 
